@@ -12,7 +12,7 @@ BIRD_DIR = 'C:\\Users\\arnav\\OneDrive\\Desktop\\Dev\\Micro-Doppler\\birdcsv'
 DRONE_DIR = 'C:\\Users\\arnav\\OneDrive\\Desktop\\Dev\\Micro-Doppler\\dronecsv'
 WINDOW_SIZE = 128
 STRIDE = 64
-EPOCHS = 3
+EPOCHS = 2
 BATCH_SIZE = 64
 
 # Load CSV data
@@ -27,7 +27,7 @@ def load_csv_sequences(folder_path, label):
                 df = df.dropna(subset=['V'])
                 data.append((df['V'].values, label))
             else:
-                print(f"⚠️ Skipped: Missing 'V' column in {file}")
+                print(f"Skipped: Missing 'V' column in {file}")
     return data
 
 # Segment and apply FFT
@@ -52,7 +52,7 @@ for seq, label in all_data:
             X.append(segment)
             y.append(lbl)
     else:
-        print(f"⚠️ Skipped short sequence: length = {len(seq)}")
+        print(f"Skipped short sequence: length = {len(seq)}")
 
 X = np.array(X)
 y = np.array(y)
@@ -92,8 +92,8 @@ print("\nClassification Report:")
 print(classification_report(y, y_pred))
 
 # Save model
-model.save('microdoppler_fft_cnn.h5')
-print("✅ FFT-based model saved as 'microdoppler_fft_cnn.h5'")
+model.save('accuracy.h5')
+print("FFT-based model saved as 'microdoppler_fft_cnn.h5'")
 
 
 

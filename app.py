@@ -9,7 +9,7 @@ STRIDE = 64
 class_names = ["Bird", "Drone"]
 
 # Load your model once
-model = load_model('microdoppler_fft_cnn.h5')
+model = load_model('accuracy.h5')
 
 def load_and_process_test_file(file_path):
     df = pd.read_csv(file_path)
