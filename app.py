@@ -1,26 +1,26 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-import numpy as np
+from tkinter import ttk, filedialog, messagebox
 import pandas as pd
+import numpy as np
 from tensorflow.keras.models import load_model
 
+
+model = load_model('accuracy.h5')
 WINDOW_SIZE = 128
 STRIDE = 64
 class_names = ["Bird", "Drone"]
 
-# Load your model once
-model = load_model('accuracy.h5')
-
 def load_and_process_test_file(file_path):
     df = pd.read_csv(file_path)
     if 'V' not in df.columns:
-        raise ValueError("CSV missing 'V' column")
-    v = pd.to_numeric(df['V'], errors='coerce').dropna().values
+        raise ValueError("CSV must contain 'V' column")
 
+    v = pd.to_numeric(df['V'], errors='coerce').dropna().values
     segments = []
+
     for i in range(0, len(v) - WINDOW_SIZE + 1, STRIDE):
-        window = v[i:i+WINDOW_SIZE]
-        fft_window = np.abs(np.fft.fft(window))[:WINDOW_SIZE//2]
+        window = v[i:i + WINDOW_SIZE]
+        fft_window = np.abs(np.fft.fft(window))[:WINDOW_SIZE // 2]
         segments.append(fft_window)
 
     X = np.array(segments)
@@ -28,50 +28,50 @@ def load_and_process_test_file(file_path):
     X = X[..., np.newaxis]
     return X
 
+# ---------------- GUI Setup ----------------
+root = tk.Tk()
+root.title("Micro-Doppler Classifier")
+root.geometry("500x300")
+root.resizable(False, False)
+
+style = ttk.Style(root)
+style.theme_use('clam')
+style.configure("TButton", font=("Segoe UI", 12), padding=10)
+style.configure("TLabel", font=("Segoe UI", 12))
+
+main_frame = ttk.Frame(root, padding=30)
+main_frame.pack(expand=True, fill='both')
+
+title = ttk.Label(main_frame, text="Micro-Doppler Object Classifier", font=("Segoe UI", 18, "bold"))
+title.pack(pady=(0, 20))
+
+result_label = ttk.Label(main_frame, text="No file loaded.", font=("Segoe UI", 16, "bold"), foreground="#555")
+result_label.pack(pady=10)
+
 def classify_file():
-    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
     if not file_path:
         return
     try:
-        X_test = load_and_process_test_file(file_path)
-        probs = model.predict(X_test)
-        predictions = (probs > 0.5).astype(int).flatten()
+        X = load_and_process_test_file(file_path)
+        probs = model.predict(X)
+        preds = (probs > 0.5).astype(int).flatten()
 
-        # Count predictions
-        num_bird = np.sum(predictions == 0)
-        num_drone = np.sum(predictions == 1)
+        
+        final_class = 0 if np.sum(preds == 0) >= np.sum(preds == 1) else 1
+        prediction_text = f"Prediction: {class_names[final_class]}"
 
-        # Decide majority class
-        final_label = "Bird" if num_bird >= num_drone else "Drone"
-
-        # Clear previous results in table
-        for i in tree.get_children():
-            tree.delete(i)
-
-        # Show just the final result in the table
-        tree.insert("", "end", values=(1, final_label))
-
-        summary_label.config(text=f"Final Prediction: {final_label}")
-
+        result_label.config(text=prediction_text, foreground="green" if final_class == 1 else "blue")
     except Exception as e:
         messagebox.showerror("Error", str(e))
+        result_label.config(text="Failed to classify.")
+    
+    final_class = 0 if np.sum(preds == 0) >= np.sum(preds == 1) else 1
+    prediction_text = f"Prediction: {class_names[final_class]}"
+    result_label.config(text=prediction_text, foreground="green" if final_class == 1 else "blue")
 
 
-# --- Tkinter UI setup ---
-root = tk.Tk()
-root.title("Micro-Doppler Object Classifier")
-
-btn_load = tk.Button(root, text="Load CSV and Classify", command=classify_file)
-btn_load.pack(pady=10)
-
-cols = ('Segment', 'Prediction')
-tree = ttk.Treeview(root, columns=cols, show='headings', height=15)
-for col in cols:
-    tree.heading(col, text=col)
-    tree.column(col, anchor='center')
-tree.pack(expand=True, fill='both')
-
-summary_label = tk.Label(root, text="No file loaded.")
-summary_label.pack(pady=10)
+btn = ttk.Button(main_frame, text="Load CSV and Predict", command=classify_file)
+btn.pack(pady=10)
 
 root.mainloop()
