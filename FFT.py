@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 
 # Config
-BIRD_DIR = 'C:\\Users\\arnav\\OneDrive\\Desktop\\Dev\\Micro-Doppler\\birdcsv'
-DRONE_DIR = 'C:\\Users\\arnav\\OneDrive\\Desktop\\Dev\\Micro-Doppler\\dronecsv'
+BIRD_DIR = 'C:\\Users\\arnav\\Desktop\\Dev\\Micro-Doppler\\birdcsv'
+DRONE_DIR = 'C:\\Users\\arnav\\Desktop\\Dev\\Micro-Doppler\\dronecsv'
 WINDOW_SIZE = 128
 STRIDE = 64
 EPOCHS = 2
@@ -92,10 +92,8 @@ print("\nClassification Report:")
 print(classification_report(y, y_pred))
 
 # Save model
-model.save('accuracy.h5')
+model.save('trial.h5')
 print("FFT-based model saved as 'microdoppler_fft_cnn.h5'")
-
-
 
 
 plt.plot(np.abs(np.fft.fft(X[0].flatten())))

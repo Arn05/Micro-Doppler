@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 
 
-model = load_model('accuracy.h5')
+model = load_model('tested_model.h5')
 WINDOW_SIZE = 128
 STRIDE = 64
 class_names = ["Bird", "Drone"]
